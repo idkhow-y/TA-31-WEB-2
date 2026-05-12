@@ -1,4 +1,4 @@
-const categories = [
+let categories = [
   'Light Arms',
   'Heavy Arms',
   'Uniforms',
@@ -6,7 +6,7 @@ const categories = [
   'Vehicles'
 ];
 
-const itemData = [
+let itemData = [
   {
     id: 'ammunition',
     name: 'Патрон 7.62',
@@ -168,6 +168,25 @@ const itemData = [
     icon: 'TruckVehicleIcon.webp'
   }
 ];
+
+async function loadAppData() {
+  try {
+    const response = await fetch('api.php');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data.categories)) {
+      categories = data.categories;
+    }
+    if (Array.isArray(data.items)) {
+      itemData = data.items;
+    }
+  } catch (error) {
+    console.warn('Failed to load data from api.php, using built-in data:', error);
+  }
+}
 
 const categorySelect = document.getElementById('categorySelect');
 const itemGrid = document.getElementById('itemGrid');
@@ -345,11 +364,16 @@ function removeFromQueue(index) {
   saveQueue();
 }
 
-loadQueue();
-renderCategoryOptions();
-renderGallery();
-renderQueue();
-updateTotals();
+async function initApp() {
+  await loadAppData();
+  loadQueue();
+  renderCategoryOptions();
+  renderGallery();
+  renderQueue();
+  updateTotals();
+}
+
+initApp();
 clearQueueBtn.addEventListener('click', clearQueue);
 
 // Check if localStorage is available
